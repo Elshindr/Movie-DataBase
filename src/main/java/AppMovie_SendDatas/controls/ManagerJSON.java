@@ -1,4 +1,4 @@
-package controls;
+package AppMovie_SendDatas.controls;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.*;
@@ -45,7 +45,7 @@ public final class ManagerJSON {
         Film[] lstFilms = mapper.readValue(new File(path.toString()), Film[].class);
         
         // Get JPA Connexion & Instances
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory("movie-database");
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory("movie-database-senddatas");
         EntityManager em = factory.createEntityManager();
         EntityTransaction tr = em.getTransaction();
 
@@ -61,17 +61,19 @@ public final class ManagerJSON {
      * @param lstFilm Film[]
      */
     public static void recupAllFilm(EntityManager em, EntityTransaction tr, Film[] lstFilm){
-        for (Film unFilm : lstFilm) {
+       // for (Film unFilm : lstFilm) {
+        for (int i=0; i<20; i++ ) {
             tr.begin();
             Film film = new Film();
 
-            Pays pays = recupPays(em, unFilm.getPays());
-            Lieu lieu = recupLieu(em, unFilm.getLieuTournage());
+            Pays pays = recupPays(em, lstFilm[i].getPays());
+            Lieu lieu = recupLieu(em, lstFilm[i].getLieuTournage());
 
-            List<Acteur> lstActeurCast = recupLstActeurCasting(em, unFilm);
-            List<Role> lstRoles = recupLstRoles(em, unFilm);
-            List<Realisateur> lstRealisateur = recupLstRealisateur(em, unFilm);
-            List<Genre> lstGenre = recupLstGenre(em, unFilm);
+            List<Acteur> lstActeurCast = recupLstActeurCasting(em, lstFilm[i]);
+            List<Role> lstRoles = recupLstRoles(em, lstFilm[i]);
+            List<Acteur> lstActeurAll = recupLstActeur(em, lstRoles);
+            List<Realisateur> lstRealisateur = recupLstRealisateur(em, lstFilm[i]);
+            List<Genre> lstGenre = recupLstGenre(em, lstFilm[i]);
 
             if (lieu != null) {
                 lieu.getLstFilm().add(film);
@@ -86,21 +88,22 @@ public final class ManagerJSON {
                 pays.getSetFilm().add(film);
             }
 
-            film.setId(unFilm.getId());
-            film.setNom(unFilm.getNom());
-            film.setLangue(unFilm.getLangue());
-            film.setUrl(unFilm.getUrl());
-            film.setPlot(unFilm.getPlot());
-            film.setAnneeSortie(unFilm.getAnneeSortie());
+            film.setId(lstFilm[i].getId());
+            film.setNom(lstFilm[i].getNom());
+            film.setLangue(lstFilm[i].getLangue());
+            film.setUrl(lstFilm[i].getUrl());
+            film.setPlot(lstFilm[i].getPlot());
+            film.setAnneeSortie(lstFilm[i].getAnneeSortie());
             film.setPays(pays);
             film.setLieuTournage(lieu);
+            em.persist(film);
 
             film.getLstRealisateur().addAll(lstRealisateur);
             film.getLstGenres().addAll(lstGenre);
             film.getLstCastingP().addAll(lstActeurCast);
             film.getLstRole().addAll(lstRoles);
+            film.getLstActeur().addAll(lstActeurAll);
 
-            em.persist(film);
             tr.commit();
         }
     }
@@ -359,6 +362,65 @@ public final class ManagerJSON {
     }
 
 
+
+    /**
+     * Methode de Récupération des Acteurs en CastingPrincipal et de leur Envoie vers la DB
+     * @param em EntityManager
+     * @param lstRoles List<Role>
+     * @return
+     */
+    private static List<Acteur>recupLstActeur(EntityManager em, List<Role> lstRoles){
+        Acteur acteur;
+        List<Acteur> lstActeur= new ArrayList<>();
+
+        if(lstRoles == null){
+            return null;
+        }
+
+        for(Role unRole: lstRoles){
+            for(Acteur unActeur: unRole.getLstActeur()){
+                TypedQuery<Acteur> query = em.createQuery("SELECT DISTINCT p FROM Acteur p WHERE nom = :nom", Acteur.class);
+                query.setParameter("nom", unActeur.getNom());
+                List<Acteur> lstActeurFind = query.getResultList();
+
+                if(lstActeurFind.isEmpty()){
+                    acteur = new Acteur();
+                    acteur.setId(unActeur.getId());
+                    acteur.setNom(unActeur.getNom());
+                    acteur.setUrl(unActeur.getUrl());
+
+                    // Enregistrement de la Date de Naissance
+                    LocalDate dateFinal;
+
+                    if(Utilitaires.localDateChecker(unActeur.getNaissance().getDateNaissance())){
+                        dateFinal = null;
+                    }
+                    else{
+                        dateFinal = Utilitaires.dateNaissanceBuilder(unActeur.getNaissance().getDateNaissance());
+                    }
+
+                    // Enregistrement du lieu de Naissance
+                    acteur.setLieuNaissance(recupLieu(em, recupActeurLieu(em, unActeur.getNaissance())));
+                    acteur.setDateNaissance(dateFinal);
+
+                    em.persist(acteur);
+                }
+                else if(lstActeurFind.size() == 1){
+                    acteur = lstActeurFind.get(0);
+                }
+                else{
+                    logger.error("Error: lstActeurFind");
+                    return null;
+                }
+                lstActeur.add(acteur);
+            }
+
+        }
+
+        return lstActeur;
+    }
+
+
     /**
      * Methode de Récupération des Roles et de leur Envoie vers la DB
      * @param em EntityManager
@@ -367,6 +429,7 @@ public final class ManagerJSON {
      */
     private static List<Role> recupLstRoles(EntityManager em, Film film) {
         Role role;
+        Acteur acteurRole;
         List<Role> lstRole = new ArrayList<>();
 
         if(film.getRoles() == null){
@@ -383,11 +446,15 @@ public final class ManagerJSON {
                 role.setCharacterName(roleDto.getCharacterName());
 
                 // Récupération de l'Acteur de ce role, dans ce film
-                recupActeurRole(em, roleDto, role);
+                 acteurRole = recupActeurRole(em, roleDto, role);
                 em.persist(role);
+
             }
             else if(lstRoleFind.size() == 1){
                 role = lstRoleFind.get(0);
+                // Récupération de l'Acteur de ce role, dans ce film
+                acteurRole = recupActeurRole(em, roleDto, role);
+
             }
             else{
                 logger.error("Error: lstRoleFind");
@@ -482,6 +549,7 @@ public final class ManagerJSON {
             return null;
         }
         role.getLstActeur().add(acteur);
+
         return acteur;
     }
 

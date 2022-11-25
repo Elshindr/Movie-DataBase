@@ -53,6 +53,13 @@ public class Film {
             inverseJoinColumns = {@JoinColumn(name = "id_role")})
     private List<Role> lstRole = new ArrayList<>();
 
+
+    @ManyToMany
+    @JoinTable(name="ACTEUR_FILM", joinColumns = {@JoinColumn(name = "id_film")},
+            inverseJoinColumns = {@JoinColumn(name = "id_acteur")})
+    private List<Acteur> lstActeur = new ArrayList<>();
+
+
     @JsonProperty("realisateurs")
     @ManyToMany
     @JoinTable(name="REAL_FILM", joinColumns = {@JoinColumn(name = "id_film")},
@@ -64,7 +71,7 @@ public class Film {
     private List<CastingPrincipal> castingPrincipal = new ArrayList<>();
 
     @ManyToMany
-    @JoinTable(name="ACTEUR_FILM", joinColumns = {@JoinColumn(name = "id_film")},
+    @JoinTable(name="CASTINGPRINCIPAL_FILM", joinColumns = {@JoinColumn(name = "id_film")},
             inverseJoinColumns = {@JoinColumn(name = "id_acteur")})
     private List<Acteur> lstCastingP = new ArrayList<>();
 
@@ -107,7 +114,6 @@ public class Film {
     public void setId(String id) {
         this.id = id;
     }
-
 
 
     /**
@@ -248,6 +254,24 @@ public class Film {
     @JsonProperty("realisateurs")
     public void setLstRealisateur(List<Realisateur> lstRealisateur) {
         this.lstRealisateur = lstRealisateur;
+    }
+
+    /**
+     * Gets lst acteur.
+     *
+     * @return the lst acteur
+     */
+    public List<Acteur> getLstActeur() {
+        return lstActeur;
+    }
+
+    /**
+     * Sets lst acteur.
+     *
+     * @param lstActeur the lst acteur
+     */
+    public void setLstActeur(List<Acteur> lstActeur) {
+        this.lstActeur = lstActeur;
     }
 
     /**

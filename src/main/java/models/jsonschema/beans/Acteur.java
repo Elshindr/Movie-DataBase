@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.*;
+import models.Film;
 import models.Lieu;
 import javax.persistence.*;
 
@@ -40,6 +41,9 @@ public class Acteur {
     @JsonProperty("roles")
     @Transient
     private List<Object> roles = new ArrayList<>();
+
+    @ManyToMany(mappedBy="lstActeur")
+    private List<Film> lstFilm = new ArrayList<>();
 
     @JsonIgnore
     @Transient
@@ -188,6 +192,23 @@ public class Acteur {
         this.dateNaissance = dateNaissance;
     }
 
+    /**
+     * Gets lst film.
+     *
+     * @return the lst film
+     */
+    public List<Film> getLstFilm() {
+        return lstFilm;
+    }
+
+    /**
+     * Sets lst film.
+     *
+     * @param lstFilm the lst film
+     */
+    public void setLstFilm(List<Film> lstFilm) {
+        this.lstFilm = lstFilm;
+    }
 
     @Override
     public String toString() {

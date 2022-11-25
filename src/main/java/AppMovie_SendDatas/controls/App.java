@@ -1,5 +1,4 @@
-package controls;
-
+package AppMovie_SendDatas.controls;
 import java.io.IOException;
 
 /**
@@ -17,8 +16,14 @@ public class App {
      */
     public static void main(String[] args) throws IOException {
 
-        if(Controler.getInstance() != null){
-            ManagerJSON.main();
+        try{
+            if(Controler.getInstance() != null){
+                ManagerJSON.main();
+            }
         }
+        catch(IOException ioException){
+            System.out.println("=================oups=================");
+        }
+
     }
 }
