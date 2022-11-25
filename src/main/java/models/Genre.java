@@ -14,7 +14,7 @@ public class Genre {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String libelle;
+    private String nom;
 
     /**
      * Instantiates a new Genre.
@@ -42,20 +42,20 @@ public class Genre {
     }
 
     /**
-     * Gets libelle.
+     * Gets nom.
      *
-     * @return the libelle
+     * @return the nom
      */
-    public String getLibelle() {
-        return libelle;
+    public String getNom() {
+        return nom;
     }
 
     /**
-     * Sets libelle.
+     * Sets nom.
      *
-     * @param libelle the libelle
+     * @param nom the nom
      */
-    public void setLibelle(String libelle) {
-        this.libelle = libelle;
+    public void setNom(String nom) {
+        this.nom = nom;
     }
 }

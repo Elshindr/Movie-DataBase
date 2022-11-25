@@ -1,6 +1,9 @@
-package AppMovie_SendDatas.controls;
+package appmovie_senddatas.controls;
 
 
+/**
+ * The type Controler.
+ */
 public class Controler {
     private static Controler instance = null;
 
@@ -8,6 +11,11 @@ public class Controler {
         super();
     }
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static Controler getInstance() {
 
         if(Controler.instance == null){

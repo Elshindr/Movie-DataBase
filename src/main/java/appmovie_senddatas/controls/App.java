@@ -1,4 +1,6 @@
-package AppMovie_SendDatas.controls;
+package appmovie_senddatas.controls;
+import appmovie_senddatas.manager.ManagerJSON;
+
 import java.io.IOException;
 
 /**

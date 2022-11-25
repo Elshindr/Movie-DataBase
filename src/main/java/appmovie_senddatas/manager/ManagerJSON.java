@@ -1,4 +1,4 @@
-package AppMovie_SendDatas.controls;
+package appmovie_senddatas.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.*;
@@ -6,7 +6,7 @@ import models.jsonschema.beans.Acteur;
 import models.jsonschema.beans.CastingPrincipal;
 import models.jsonschema.beans.Naissance;
 import models.jsonschema.beans.RoleDto;
-import utils.Utilitaires;
+import appmovie_senddatas.utils.Utilitaires;
 import javax.persistence.*;
 import java.io.File;
 import java.io.IOException;
@@ -251,7 +251,7 @@ public final class ManagerJSON {
 
             if(lstGenreFind.isEmpty() ){
                 genre = new Genre();
-                genre.setLibelle(strGenre);
+                genre.setNom(strGenre);
                 em.persist(genre);
             }
             else if(lstGenreFind.size() == 1){
